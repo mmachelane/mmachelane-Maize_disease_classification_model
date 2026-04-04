@@ -56,7 +56,16 @@ def classify(image):
     confidence  = float(preds[top_idx]) * 100
 
     confidences = {LABELS.get(c, c): float(p) for c, p in zip(class_names, preds)}
-    advice      = f"**{LABELS.get(top_class, top_class)}** ({confidence:.1f}% confidence)\n\n{ADVICE.get(top_class, '')}"
+
+    if confidence < 65:
+        advice = (
+            f"⚠️ **Low confidence ({confidence:.1f}%)** — the model is uncertain.\n\n"
+            "This image may be outside the model's training distribution (field lighting, angle, or background). "
+            "Consider retaking the photo with the leaf filling the frame in good lighting, or consult an agronomist."
+        )
+    else:
+        advice = f"**{LABELS.get(top_class, top_class)}** ({confidence:.1f}% confidence)\n\n{ADVICE.get(top_class, '')}"
+
     return confidences, advice
 
 
