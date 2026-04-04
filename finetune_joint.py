@@ -23,6 +23,7 @@ PV_DIR      = os.path.join(REPO_DIR, 'data', 'maize_only')
 FIELD_DIR   = os.path.join(REPO_DIR, 'data', 'maize_in_field')
 MODEL_IN    = os.path.join(REPO_DIR, 'models', 'best_model.keras')
 MODEL_OUT   = os.path.join(REPO_DIR, 'models', 'best_model_joint.keras')
+MODEL_OUT_A = os.path.join(REPO_DIR, 'models', 'best_model_joint_phaseA.keras')
 LOG_PATH    = os.path.join(REPO_DIR, 'models', 'joint_log.csv')
 
 IMG_SIZE    = (224, 224)
@@ -67,9 +68,6 @@ augment = Sequential([
 
 AUTOTUNE = tf.data.AUTOTUNE
 
-def prep(ds):
-    return ds.map(lambda x, y: (augment(x, training=True), y)).prefetch(AUTOTUNE)
-
 # Oversample field images 3× so they're not drowned by PlantVillage
 field_train_over = field_train.repeat(3)
 
@@ -113,7 +111,7 @@ LOG_A = os.path.join(os.path.dirname(LOG_PATH), 'joint_log_a.csv')
 LOG_B = os.path.join(os.path.dirname(LOG_PATH), 'joint_log_b.csv')
 
 callbacks_a = [
-    ModelCheckpoint(MODEL_OUT, monitor='val_accuracy', save_best_only=True, mode='max', verbose=1),
+    ModelCheckpoint(MODEL_OUT_A, monitor='val_accuracy', save_best_only=True, mode='max', verbose=1),
     EarlyStopping(monitor='val_accuracy', patience=10, restore_best_weights=True, verbose=1),
     ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=5, min_lr=1e-7, verbose=1),
     CSVLogger(LOG_A),
@@ -157,7 +155,24 @@ model.fit(
     epochs=EPOCHS, callbacks=callbacks_b, verbose=1
 )
 
-_, acc_pv_final    = model.evaluate(pv_val,    verbose=0)
-_, acc_field_final = model.evaluate(field_val, verbose=0)
-print(f"\nFinal — PlantVillage: {acc_pv_final*100:.1f}%  |  Field: {acc_field_final*100:.1f}%")
-print(f"Joint model saved to: {MODEL_OUT}")
+_, acc_pv_b    = model.evaluate(pv_val,    verbose=0)
+_, acc_field_b = model.evaluate(field_val, verbose=0)
+combined_b = acc_pv_b + acc_field_b
+
+# Load Phase A model and compare — keep whichever phase performed better
+model_a = tf.keras.models.load_model(MODEL_OUT_A)
+model_a.compile(loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+_, acc_pv_a2    = model_a.evaluate(pv_val,    verbose=0)
+_, acc_field_a2 = model_a.evaluate(field_val, verbose=0)
+combined_a = acc_pv_a2 + acc_field_a2
+
+print(f"\nPhase A — PlantVillage: {acc_pv_a2*100:.1f}%  |  Field: {acc_field_a2*100:.1f}%  (combined score: {combined_a:.4f})")
+print(f"Phase B — PlantVillage: {acc_pv_b*100:.1f}%  |  Field: {acc_field_b*100:.1f}%  (combined score: {combined_b:.4f})")
+
+if combined_a >= combined_b:
+    import shutil
+    shutil.copy(MODEL_OUT_A, MODEL_OUT)
+    print(f"\nPhase A was better — saved as: {MODEL_OUT}")
+else:
+    print(f"\nPhase B was better — already saved as: {MODEL_OUT}")
+print("Done.")
