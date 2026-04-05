@@ -1,3 +1,14 @@
+---
+title: Maize Disease Classifier
+emoji: 🌽
+colorFrom: green
+colorTo: yellow
+sdk: gradio
+app_file: app.py
+pinned: false
+python_version: "3.10"
+---
+
 # 🌽 Maize Disease Classification Model
 
 ### Detecting Maize Leaf Diseases with Deep Learning
