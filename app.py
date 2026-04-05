@@ -174,7 +174,7 @@ with gr.Blocks(title="Maize Disease Classifier") as demo:
     gr.Markdown(
         "---\n"
         "Model trained on [PlantVillage Dataset](https://www.kaggle.com/datasets/abdallahalidev/plantvillage-dataset) · "
-        "[GitHub](https://github.com/mmachelane/Maize_disease_classification_model)"
+        "[GitHub](https://github.com/mmachelane/mmachelane-Maize_disease_classification_model)"
     )
 
 demo.launch(theme=gr.themes.Base())
