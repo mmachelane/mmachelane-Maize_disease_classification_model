@@ -1,15 +1,3 @@
----
-title: Maize Disease Classifier
-emoji: 🌽
-colorFrom: green
-colorTo: yellow
-sdk: gradio
-sdk_version: "5.23.3"
-python_version: "3.10"
-app_file: app.py
-pinned: false
----
-
 # 🌽 Maize Disease Classifier
 
 **Real-World Maize Leaf Disease Detection — EfficientNetB4 + Joint Training + TTA + Temperature Scaling**
