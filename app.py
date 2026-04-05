@@ -149,7 +149,7 @@ def classify(image):
 
 
 # ── UI ────────────────────────────────────────────────────────────────────────
-with gr.Blocks(title="Maize Disease Classifier") as demo:
+with gr.Blocks(title="Maize Disease Classifier", theme=gr.themes.Base()) as demo:
     gr.Markdown(
         """
         # 🌽 Maize Disease Classifier
@@ -177,4 +177,4 @@ with gr.Blocks(title="Maize Disease Classifier") as demo:
         "[GitHub](https://github.com/mmachelane/mmachelane-Maize_disease_classification_model)"
     )
 
-demo.launch(theme=gr.themes.Base())
+demo.launch()
